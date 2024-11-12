@@ -33,7 +33,8 @@ float plot (vec2 st, float pct){
 		float distance = sqrt(pow(pos.x - origin.x, 2.0) + pow(pos.y - origin.y, 2.0));
 		return distance - radius;
 	}
-
+float plane = 0.1;  // 地平线
+float speed = 0.1;  // 太阳升起速度
 void main() {
     vec2 st = gl_FragCoord.xy/u_resolution.xy;
     vec3 color = vec3(0.0);
@@ -49,8 +50,10 @@ void main() {
 //     color = mix(color,vec3(0.0,1.0,0.0),plot(st,pct.g));
 //     color = mix(color,vec3(0.0,0.0,1.0),plot(st,pct.b));
 	
-    vec2 o = vec2(0.7, abs(cos(u_time)));
-    float r = 0.1 + abs(sin(u_time));
+    float time_speed = u_time * speed;
+    float fract_time = fract(time_speed);
+    vec2 o = vec2(0.7, clamp(plane, 1., fract_time));
+    float r = 0.05 + clamp(0., 0.1, fract_time);
     float r_square = 0.04;
 	float pct1 = (1.0 - step(r, abs(o.x - st.x))) * (o.y + sqrt(max(pow(r, 2.) - pow(o.x-st.x, 2.), 0.)));
 	float pct2 = (1.0 - step(r, abs(o.x - st.x))) * (o.y - sqrt(max(pow(r, 2.) - pow(o.x-st.x, 2.), 0.)));
@@ -59,7 +62,7 @@ void main() {
     // float is_cir = circle_2(st, o, r);
     float sdf_to_circle = circle_sdf(st, o, r);
     float is_cir = clamp(.0, 0.1, sdf_to_circle);
-    color = (1.0- is_cir) * color + is_cir * vec3(0.0, 0.0, 0.0);
+    color = (1.0- is_cir) * color + is_cir * vec3(0.9294, 0.9294, 0.0627) * 10.;
     
     gl_FragColor = vec4(color,1.0);
 }

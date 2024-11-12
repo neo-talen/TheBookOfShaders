@@ -140,7 +140,7 @@ void main() {
 	{
 		// 返回点到圆形边缘的距离
 		float distance = sqrt(pow(pos.x - origin.x, 2.0) + pow(pos.y - origin.y, 2.0));
-		return distance = radius;
+		return distance - radius;
 	}
 	
-	
+	像素点st在圆形内部的时候返回
