@@ -14,6 +14,10 @@ void main() {
 
     float p = smoothstep(.0, 1., st.x);
     
-	gl_FragColor = vec4(vec3(p, .1, .1), 1.0);
+	vec2 center = vec2(0.5);
+	vec2 dir = center - st;
+	float theata = atan(dir.y, dir.x);
+
+	gl_FragColor = vec4(vec3(1.-sin(theata)), 1.0);
 }
 

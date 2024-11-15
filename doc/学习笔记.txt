@@ -1,0 +1,146 @@
+uniform vec2 u_resolution;  // 画布大小
+uniform vec2 u_time; 		// 时间
+
+
+vec2 st = gl_FragCoord.xy / u_resolution;  // 归一化像素点坐标： 0->1
+
+
+// 如何画线条，
+float plot(vec2 st, float pct)
+{
+	return smoothstep( pct-0.01, pct, st.y) - smoothstep( pct, pct+0.01, st.y);
+}
+
+理解：
+pct是根据函数计算出来的目标值，如对于函数f(x) = x * x; 则目标值是x*x,
+针对这个目标值，在+-0.01的范围内计算趋近数据：
+	如当x取得2的时候，目标值为2 * 2 = 4，
+	当st.y < 4 - 0.01的时候，则是0值
+	当st.y > 4 + 0.01的时候，则是0值
+	则当st.y值在4 - 0.01 到 4 + 0.01 之间的时候，则plot返回的值是一个非0值，且越接近pct目标值4，plot返回值越接近1
+
+从图像上看就是，对于4这行像素点，在上下0.01的范围内，都是非0值，超出则是0值，画的时候就是一个点。
+
+
+// 举一反三: 尝试画圆
+
+分析：
+	方式1. 最直接的方法：我们想要在x对应的圆形的取值两个y值上，都取到非0值，其他点都是0值
+	float circle(vec2 st, float pct1, float pct2)
+	{
+		return (smoothstep( pct1-0.01, pct1, st.y) - smoothstep( pct1, pct1+0.01, st.y) + smoothstep( pct2-0.01, pct2, st.y) - smoothstep( pct2, pct2+0.01, st.y));
+	}
+
+	如何计算x值对应的pct1和pct2呢？
+	设圆心坐标是o， 圆形半径是r，则pct1和pct2为
+	
+    float pct1 = o.y + sqrt(max(pow(r, 2.0) - pow(o.x-st.x, 2.0), 0.));
+	float pct2 = o.y - sqrt(max(pow(r, 2.0) - pow(o.x-st.x, 2.0), 0.));
+	
+	// 
+	遇到问题：左右两边会出现两个直线
+	原因分析：
+		左右两边的切点及横线点，pct1==pct2==y, 此时circle计算是同样的pct值会返回1
+		pct1和pct2计算时，对于超出圆形的x的处理有问题，返回了o.y
+	
+	解决方法尝试：依据st.x和o.x的距离跟半径的关系，乘上一个step( < r的时候*1， >r的时候*0
+	float pct1 = (1.0 - step(r, abs(o.x - st.x))) * (o.y + sqrt(max(pow(r, 2.) - pow(o.x-st.x, 2.), 0.)));
+	float pct2 = (1.0 - step(r, abs(o.x - st.x))) * (o.y - sqrt(max(pow(r, 2.) - pow(o.x-st.x, 2.), 0.)));
+	
+	新问题，直线移动到了st.y==0的位置
+	原因分析，pct==0的时候st.y==0的时候返回1
+	解决方法尝试：
+	smoothstep计算时*step(0, st.y)，去掉第0行？（如果圆在第0行怎么处理呢？
+	
+	float circle(vec2 st, float pct1, float pct2)
+	{
+		return step(0.01, st.y) * (smoothstep( pct1-0.01, pct1, st.y) - smoothstep( pct1, pct1+0.01, st.y) + smoothstep( pct2-0.01, pct2, st.y) - smoothstep( pct2, pct2+0.01, st.y));
+	}
+	（如果圆在第0行怎么处理呢？
+	
+	【【【勉强能用】】】
+	
+完整代码：
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+#define PI 3.14159265359
+
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+uniform float u_time;
+
+vec3 colorA = vec3(0.149,0.141,0.912);
+vec3 colorB = vec3(1.000,0.833,0.224);
+
+
+
+float plot (vec2 st, float pct){
+  return  smoothstep( pct-0.01, pct, st.y) - smoothstep( pct, pct+0.01, st.y);
+}
+
+	float circle(vec2 st, float pct1, float pct2)
+{
+		return step(0.01, st.y) * (smoothstep( pct1-0.01, pct1, st.y) - smoothstep( pct1, pct1+0.01, st.y) + smoothstep( pct2-0.01, pct2, st.y) - smoothstep( pct2, pct2+0.01, st.y));
+	}
+
+void main() {
+    vec2 st = gl_FragCoord.xy/u_resolution.xy;
+    vec3 color = vec3(0.0);
+
+    vec3 pct = vec3(st.x);
+
+    pct.r = smoothstep(0.0,1.0, st.x);
+    pct.g = sin(st.x*PI);
+    pct.b = pow(st.x,0.5);
+
+    color = mix(colorA, colorB, pct);
+
+//     // Plot transition lines for each channel
+//     color = mix(color,vec3(1.0,0.0,0.0),plot(st,pct.r));
+//     color = mix(color,vec3(0.0,1.0,0.0),plot(st,pct.g));
+//     color = mix(color,vec3(0.0,0.0,1.0),plot(st,pct.b));
+	
+    vec2 o = vec2(0.7, abs(sin(u_time)));
+    float r = 0.2;
+	float pct1 = (1.0 - step(r, abs(o.x - st.x))) * (o.y + sqrt(max(pow(r, 2.) - pow(o.x-st.x, 2.), 0.)));
+	float pct2 = (1.0 - step(r, abs(o.x - st.x))) * (o.y - sqrt(max(pow(r, 2.) - pow(o.x-st.x, 2.), 0.)));
+
+    float is_cir = circle(st, pct1, pct2);
+    
+    color = (1.0- is_cir) * color + is_cir * vec3(1.0, 0., 0.);
+    
+    gl_FragColor = vec4(color,1.0);
+}
+
+	方式2. 计算点到圆形距离来画
+	float circle_2(vec2 st, vec2 origin, float radius_square)
+	{
+		return smoothstep(radius_square - 0.00001, radius_square + 0.00001, pow(st.x - origin.x, 2.0) + pow(st.y - origin.y, 2.0));
+	}
+	
+	问题：实心了
+	尝试修改：
+	float circle_2(vec2 st, vec2 origin, float radius)
+	{
+		float distance = sqrt(pow(st.x - origin.x, 2.0) + pow(st.y - origin.y, 2.0));
+		return smoothstep(-0.01, 0., distance - radius) - smoothstep(0., 0.01, distance - radius);
+	}
+	解决问题
+
+	
+【重新理解】：
+	smoothstep(a, b., x) - smoothstep(b, c, x);
+	会使得<a 和 >c的x值都返回0
+	a到b和b到c的值，都会平滑
+	
+	方式3. sdf
+	float circle_sdf(vec2 pos, vec2 origin, float radius)
+	{
+		// 返回点到圆形边缘的距离
+		float distance = sqrt(pow(pos.x - origin.x, 2.0) + pow(pos.y - origin.y, 2.0));
+		return distance - radius;
+	}
+	
+	像素点st在圆形内部的时候返回
