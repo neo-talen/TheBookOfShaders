@@ -17,7 +17,6 @@ float smooth_point(vec2 st, float target_y, float smoot_half)
 }
 
 
-
 void main() {
 	vec2 st = gl_FragCoord.xy / u_resolution.xy;
 	st -= 0.5;
