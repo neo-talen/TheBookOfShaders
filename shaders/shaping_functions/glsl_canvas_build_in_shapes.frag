@@ -23,12 +23,17 @@ float sArc(in vec2 p, in float w, in float s, in float e) {
     b = distance(p, w * 0.5 * vec2(cos(b), sin(b)));
     return min(a, b) * 2.0;
 }
-float arc(in vec2 p, in float w, in float s, in float e, in float t) {
-    float d = sArc(p, w, s, e);
-    return stroke(d, t);
+// float arc(in vec2 p, in float w, in float s, in float e, in float t) {
+//     float d = sArc(p, w, s, e);
+//     return stroke(d, t);
+// }
+
+/* Easing Back In equation */
+/* Adapted from Robert Penner easing equations */
+float easeBackIn(float t) {
+    float s = 1.70158;
+    return t * t * ((s + 1.0) * t - s);
 }
-
-
 
 
 
@@ -45,12 +50,13 @@ float smooth_point(vec2 st, float target_y, float smoot_half)
 
 void main() {
 	vec2 st = gl_FragCoord.xy / u_resolution.xy;
-
-    float y = smoothstep(.0, 1., st.x);
-    
+    st *= 2.2;
+    st.y -= 1.;
+    float y = easeBackIn(smoothstep(.3, 0.8, st.x));
+    y = y * sin(u_time);
 	vec3 color = vec3(0.9608, 0.3882, 0.0588);
 
-	color = mix(color, vec3(0., 1., 0.), smooth_point(st, y, 0.05));
+	color = mix(color, vec3(0., 1., 0.), smooth_point(st, y, 0.01));
 
 	gl_FragColor = vec4(color, 1.0);
 }

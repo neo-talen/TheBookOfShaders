@@ -26,7 +26,7 @@ void main() {
 	sep_line = loop_moving * fract(sep_line * sin(u_time));
 
 	// 依据该点的计算出来的数值，来决定颜色值
-	color = mix(color, vec3(0., 1., 0.), step(0.2, sep_line));
+	color = mix(color, vec3(0.7294, 0.9804, 0.0471), step(0.2, sep_line));
 	color = mix(color, vec3(0.0, 0.102, 1.0), step(0.4, sep_line));
 	color = mix(color, vec3(0.9137, 0.0353, 0.1804), step(0.6, sep_line));
 	color = mix(color, vec3(0.8745, 0.5608, 0.4392), step(0.8, sep_line));

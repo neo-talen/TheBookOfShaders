@@ -11,7 +11,7 @@ uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
 
-float smooth_point(vec2 st, float target_y, float smoot_half)
+float smooth_point(vec2 st,float target_y,float smoot_half)
 {
 	return smoothstep(target_y - smoot_half, target_y, st.y) - smoothstep(target_y, target_y + smoot_half, st.y);
 }
