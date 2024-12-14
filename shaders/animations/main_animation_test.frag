@@ -15,7 +15,7 @@ void main() {
             vec2(2., 1.),
     };
 
-    vec2 grid = grid_list[0];  // mix(grid_list[int(fract_time)], grid_list[mod(int(fract_time) + 1, 4.)], fract_time - int(fract_time));
+    vec2 grid = mix(grid_list[int(fract_time)], grid_list[mod(int(fract_time) + 1, 4.)], fract_time - int(fract_time));
     vec2 st;
     vec2 cell_idx;
     prepare_grid(grid, st, cell_idx);
@@ -35,7 +35,8 @@ void main() {
     float half_size = 0.35 * variable_size + 0.1;  // [0.1, 0.4]
 
     float is_in_box = draw_square(st, center, vec2(half_size));
-    float is_in_circle = draw_circle(st, center, half_size);
+   //  float is_in_circle = draw_sphere(st, center, half_size);
+    float is_in_circle = sdf_sphere(st, center, half_size);
     float is_in_triangle = draw_triangle(st, center, center + vec2(half_size), center - vec2(half_size, -half_size));
 
     vec3 box_color = vec3(cell_idx, .5);

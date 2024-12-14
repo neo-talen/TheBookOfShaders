@@ -60,7 +60,7 @@ float draw_square(vec2 st, vec2 center, vec2 half_size)
 }
 
 // ----------- 画圆
-float draw_circle(vec2 st, vec2 center, float radius)
+float draw_sphere(vec2 st, vec2 center, float radius)
 {
     // 本质上返回一个值，1表示在圆形内，0表示在圆形外
     float is_inside_circle = step(radius, length(st - center));
@@ -73,14 +73,15 @@ float draw_triangle(vec2 st, vec2 p1, vec2 p2, vec2 p3)
     // 本质上返回一个值，1表示在三角形内，0表示在三角形外
     float is_in_trianlge = 1.;
 
-    vec2 d_p1 = p1 - st;
-    vec2 d_p2 = p2 - st;
-    vec2 d_p3 = p3 - st;
+    vec2 d_p1 = normalize(p1 - st);
+    vec2 d_p2 = normalize(p2 - st);
+    vec2 d_p3 = normalize(p3 - st);
 
     vec2 d_p1_p2 = d_p1 + d_p2;
     vec2 d_p1_p3 = d_p1 + d_p3;
     vec2 d_p2_p3 = d_p2 + d_p3;
-    is_in_trianlge = step(.0, dot(d_p1_p2, d_p1_p3) * dot(d_p1_p2, d_p2_p3) * dot(d_p2_p3, d_p1_p3));
+    float tolerance = 0.01;
+    is_in_trianlge = (1. - step(tolerance, dot(d_p1_p2, d_p3))) * (1. - step(tolerance, dot(d_p1_p3, d_p2))) * (1. - step(tolerance, dot(d_p2_p3, d_p1))) ;
 
     return is_in_trianlge;
 }
@@ -97,3 +98,17 @@ void prepare_grid(vec2 grid, out vec2 cell_st, out vec2 cell_idx)
     cell_st = fract(st_all);
     cell_idx = floor(st_all) / grid;
 }
+
+
+
+
+/////////////////////////////////////// SDF //////////////////////////////////////////////////////////////
+// 实用网站 https://iquilezles.org/articles/distfunctions2d/
+
+float sdf_sphere(vec2 point, vec2 center, float radius)
+{
+    // 返回指定点 point 到指定圆（center, radius）的sdf值： 0表示在圆周上，正值在圆外，负值在圆内
+
+    return length(point - center) - radius;
+}
+
