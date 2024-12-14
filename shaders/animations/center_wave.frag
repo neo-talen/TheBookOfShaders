@@ -11,7 +11,7 @@ void main() {
 
     float dis = length(st - center);
 
-    vec3 cur_color = vec3(cos(-u_time + dis * 20.) * 0.3 + 0.3, 1., 1.);
+    vec3 cur_color = vec3(cos(-u_time * 5 + dis * 20.) * 0.3 + 0.3, abs(sin(u_time)), 1.);
 
     // 最终颜色
     vec3 finale_color = cur_color;

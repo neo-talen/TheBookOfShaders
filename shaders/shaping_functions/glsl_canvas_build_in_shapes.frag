@@ -35,7 +35,17 @@ float easeBackIn(float t) {
     return t * t * ((s + 1.0) * t - s);
 }
 
-
+vec3 get_scaner(in vec3 base_color)
+{
+    vec2 uv = (-u_resolution.xy + 2.0 * gl_FragCoord.xy) / u_resolution.y;
+    vec2 uv2 = uv;
+    //Asin a + B sin 2a +C sin 3a +D sin 4a
+    uv2.x += u_resolution.x/u_resolution.y;
+    uv2.x -= 2.0*mod(u_time, 1.0*u_resolution.x/u_resolution.y);
+    float width = -(1.0/(25.0*uv2.x));
+   	vec3 l = width * base_color;
+    return l;
+}
 
 // ----------------------------------------------
 
@@ -45,19 +55,21 @@ float smooth_point(vec2 st, float target_y, float smoot_half)
 	smoothstep(target_y, target_y + smoot_half, st.y);
 }
 
-
-
-
 void main() {
 	vec2 st = gl_FragCoord.xy / u_resolution.xy;
     st *= 2.2;
     st.y -= 1.;
     float y = easeBackIn(smoothstep(.3, 0.8, st.x));
-    y = y * sin(u_time);
+    float cur_left_x = fract(u_time) * 2.2;
+    float cur_right_x = cur_left_x + 0.3;
+
+    // y *= step(cur_left_x, st.x) * (1. - step(cur_right_x, st.x));
+
+    // y = y * sin(u_time);
 	vec3 color = vec3(0.9608, 0.3882, 0.0588);
 
 	color = mix(color, vec3(0., 1., 0.), smooth_point(st, y, 0.01));
-
-	gl_FragColor = vec4(color, 1.0);
+    vec3 l = get_scaner(vec3(1.0, 3.0, 2.))* 2.;
+	gl_FragColor = vec4(vec3(smooth_point(st, y, 0.03), .0, 0.) * l, 1.0);
 }
 

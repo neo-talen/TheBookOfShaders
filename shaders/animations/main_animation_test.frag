@@ -1,22 +1,20 @@
-
 #include "../common/common_all.glsl"
-
 
 
 // todo 遍历函数
 
 void main() {
-    u_time = u_time * 0.1;
+    float my_time = u_time * 0.1;
 
-    float fract_time = fract(u_time) * 4;  // 0 - 4;
-    vec2[] grid_list = {
-            vec2(1., 1.),
-            vec2(1., 2.),
-            vec2(2., 2.),
-            vec2(2., 1.),
-    };
+    float fract_time = fract(my_time) * 4.;  // 0 - 4;
+    // vec2[4] grid_list = {
+    //         vec2(1., 1.),
+    //         vec2(1., 2.),
+    //         vec2(2., 2.),
+    //         vec2(2., 1.),
+    // };
 
-    vec2 grid = mix(grid_list[int(fract_time)], grid_list[mod(int(fract_time) + 1, 4.)], fract_time - int(fract_time));
+    vec2 grid = vec2(1.0);  // grid_list[0];  // mix(grid_list[int(fract_time)], grid_list[mod(int(fract_time) + 1, 4.)], fract_time - int(fract_time));
     vec2 st;
     vec2 cell_idx;
     prepare_grid(grid, st, cell_idx);
@@ -29,7 +27,7 @@ void main() {
 
     float diagonal = .0 * cell_idx.x + cell_idx.y + 0.1;  // y = x 对角线，格子延y=x对角线分批次（1，2）格子和（2,1）格子的这个值是一样的
 
-    float variable_size = 1.;  // abs(sin(u_time + diagonal));
+    float variable_size = 1.;  // abs(sin(my_time + diagonal));
 
     // 画中心正方形
     vec2 center = vec2(.5);
