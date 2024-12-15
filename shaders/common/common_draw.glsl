@@ -64,7 +64,7 @@ float draw_sphere(vec2 st, vec2 center, float radius)
 {
     // 本质上返回一个值，1表示在圆形内，0表示在圆形外
     float is_inside_circle = step(radius, length(st - center));
-    return is_inside_circle;
+    return 1. - is_inside_circle;
 }
 
 // ----------- 画三角形

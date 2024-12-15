@@ -3,7 +3,7 @@
 #include "../common/common_all.glsl"
 
 vec3 direction_light = vec3(1.);
-
+vec3 light_color = vec3(.0, 1., 0.);
 
 void main() {
     vec2 st = gl_FragCoord.xy / u_resolution.xy;
@@ -17,7 +17,7 @@ void main() {
     float height = cos(-u_time + dis * 20.0) * 0.3 + 0.3;
     float normal = vec3(normalize(direct_2d).xy, sin(-u_time));
 
-    vec3 cur_color = vec3(cos(-u_time + dis * 20.) * 0.3 + 0.3, 1., 1.);
+    vec3 cur_color = vec3(cos(-u_time + dis * 20.) * 0.3 + 0.3);
 
     // 最终颜色
     vec3 finale_color = cur_color;
