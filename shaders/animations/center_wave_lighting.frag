@@ -45,9 +45,13 @@ void main() {
      vec3 light_color = vec3(1.0, 1.0, 1.0);
 
     // 点光源
-    vec3 light_pos = vec3(st_mouse.x, st_mouse.y, 4.);  // vec3(fract(u_time * 0.2) * 20. - 5., 0., 3.0);
+    vec3 light_pos = vec3(st_mouse.x, st_mouse.y, 8.);  // vec3(fract(u_time * 0.2) * 20. - 5., 0., 3.0);
+    vec3 light_direction = light_pos - frag_pos;
+    float light_distance = length(light_direction);
+    light_direction = normalize(light_direction);
 
-    vec3 light_direction = normalize(light_pos - frag_pos);
+    float max_light_distance = 3.;
+    float light_density = 1.; //  - smoothstep(1., max_light_distance, light_distance) / max_light_distance;
 
     vec3 camer_pos = vec3(0., .0, 8.);
 
@@ -65,7 +69,8 @@ void main() {
     vec3 view_dir = normalize(camer_pos - frag_pos);
     vec3 reflect_dir = reflect(-light_direction, frag_normal);
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64.);
-    vec3 specular = specular_strength * spec * light_color;
+
+    vec3 specular = specular_strength * spec * light_color * light_density;
 
     // 最终颜色
     vec3 finale_color = vec3(0.2, 1., 1.) * (ambient_light + diffuse + specular);
