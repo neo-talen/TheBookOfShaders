@@ -7,26 +7,45 @@ vec3 light_color = vec3(.0, 1., 0.);
 
 void main() {
     vec2 st = gl_FragCoord.xy / u_resolution.xy;
-    st = (st - 0.5) * 4;
+    st = (st - 0.5) * 4.;
 
     vec2 st_mouse = u_mouse.xy / u_resolution.xy;
     st_mouse = (st_mouse - 0.5) * 4.;  // [-2, 2]
 
-    vec2 center = vec2(.0);
+    vec2 center = vec2(0.0);
 
     vec2 direct_2d = st - center;
-    float radius = length(direct_2d);
+    float dis_to_center = length(direct_2d);
+    float x = -u_time + dis_to_center * 16.;
+    // float approximate_center = floor((st.x + center.x) / PI) * PI;
 
-    float height = cos(-u_time + radius * 8.);
+    float height = cos(x);
+    float much_PI_fac = floor((x + PI / 2.) / PI);
+
+    float sig = much_PI_fac;  // 奇数个much_PI_fac则是-1
+
+    while(sig > 0)
+    {
+        sig -= 2.;
+    }
+    sig *= 2.;
+    sig -= 1.;
+
+    float much_PI = much_PI_fac * PI;
+    float factory = much_PI / x;
+
     vec3 frag_pos = vec3(st.x + center.x, st.y + center.y, height);
-    vec3 dir_1 = vec3(radius * radius / st.x, .0, .0) - vec3(st.x, st.y, .0);
+
+    vec3 approximate_center = vec3(frag_pos.x * factory, frag_pos.y * factory, .0);
+
+    // vec3 dir_1 = vec3(radius * radius / st.x, .0, .0) - vec3(st.x, st.y, .0);
     // vec3 dir_2 =
-    vec3 frag_normal = normalize(vec3(, height));
+    vec3 frag_normal = normalize((frag_pos - approximate_center) * sig);
 
      vec3 light_color = vec3(1.0, 1.0, 1.0);
 
     // 点光源
-    vec3 light_pos = vec3(st_mouse.x * 2., st_mouse.y * 2., 4.);  // vec3(fract(u_time * 0.2) * 20. - 5., 0., 3.0);
+    vec3 light_pos = vec3(st_mouse.x, st_mouse.y, 4.);  // vec3(fract(u_time * 0.2) * 20. - 5., 0., 3.0);
 
     vec3 light_direction = normalize(light_pos - frag_pos);
 
@@ -45,7 +64,7 @@ void main() {
     float specular_strength = 0.9;  // 10. * abs(sin(u_time));  // 镜面光反射强度
     vec3 view_dir = normalize(camer_pos - frag_pos);
     vec3 reflect_dir = reflect(-light_direction, frag_normal);
-    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 32.);
+    float spec = pow(max(dot(view_dir, reflect_dir), 0.0), 64.);
     vec3 specular = specular_strength * spec * light_color;
 
     // 最终颜色
