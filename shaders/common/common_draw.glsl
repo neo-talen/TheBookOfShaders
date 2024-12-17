@@ -105,10 +105,22 @@ void prepare_grid(vec2 grid, out vec2 cell_st, out vec2 cell_idx)
 /////////////////////////////////////// SDF //////////////////////////////////////////////////////////////
 // 实用网站 https://iquilezles.org/articles/distfunctions2d/
 
-float sdf_sphere(vec2 point, vec2 center, float radius)
+float sdf_sphere(vec2 point, float radius)
 {
+    // center 默认为原点
     // 返回指定点 point 到指定圆（center, radius）的sdf值： 0表示在圆周上，正值在圆外，负值在圆内
 
-    return length(point - center) - radius;
+    return length(point) - radius;
+}
+
+float sdf_equilateral_triangle(in vec2 p, in float r)
+{
+    // 正三角形
+    const float k = sqrt(3.0);
+    p.x = abs(p.x) - r;
+    p.y = p.y + r/k;
+    if( p.x+k*p.y>0.0 ) p = vec2(p.x-k*p.y,-k*p.x-p.y)/2.0;
+    p.x -= clamp( p.x, -2.0*r, 0.0 );
+    return -length(p)*sign(p.y);
 }
 
